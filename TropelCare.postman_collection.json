@@ -1,0 +1,143 @@
+{
+  "info": {
+    "name": "TropelCare Signal Engine",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "sectorId", "value": "1" },
+    { "key": "tropelId", "value": "1" },
+    { "key": "signalId", "value": "1" },
+    { "key": "signal2Id", "value": "2" }
+  ],
+  "item": [
+    {
+      "name": "1 - List guardians",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/guardians"
+      }
+    },
+    {
+      "name": "2 - Create sector capacity 1",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sectorCode\": \"SECTOR-7\",\n  \"climate\": \"RETRO_ARCADE\",\n  \"capacity\": 1\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/sectors"
+      }
+    },
+    {
+      "name": "3 - Create BipBop",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"BipBop\",\n  \"species\": \"GLITCHY\",\n  \"sectorId\": {{sectorId}},\n  \"guardianId\": 1\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/tropels"
+      }
+    },
+    {
+      "name": "4 - Get sector",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/sectors/{{sectorId}}"
+      }
+    },
+    {
+      "name": "5 - Create second Tropel should fail",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"BipBop2\",\n  \"species\": \"CHISPA\",\n  \"sectorId\": {{sectorId}},\n  \"guardianId\": 1\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/tropels"
+      }
+    },
+    {
+      "name": "6 - Create hunger signal",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": 1,\n  \"senderTag\": \"sensor-norte-7\",\n  \"rawContent\": \"BipBop lleva 3 ciclos sin recibir nutrientes y ha empezado a morder los bordes del sector digital.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/signals"
+      }
+    },
+    {
+      "name": "7 - Get Tropel",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/tropels/{{tropelId}}"
+      }
+    },
+    {
+      "name": "8 - Get care response",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/signals/{{signalId}}/care-response"
+      }
+    },
+    {
+      "name": "9 - Create mutation signal",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": 1,\n  \"senderTag\": \"sensor-genetico-1\",\n  \"rawContent\": \"BipBop emite un brillo verde anomalo. Se han detectado dos extremidades adicionales que no existian en el registro inicial.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/signals"
+      }
+    },
+    {
+      "name": "10 - Get signal 2",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/signals/{{signal2Id}}"
+      }
+    },
+    {
+      "name": "11 - Wrong guardian should fail",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": 99,\n  \"senderTag\": \"sensor-test\",\n  \"rawContent\": \"Prueba de validacion de guardian incorrecto.\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/signals"
+      }
+    },
+    {
+      "name": "12 - Filter signals by HAMBRE",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/signals?signalType=HAMBRE&page=0&size=10"
+      }
+    },
+    {
+      "name": "13 - Filter Tropels by ESTABLE",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/tropels?vitalState=ESTABLE&page=0&size=10"
+      }
+    },
+    {
+      "name": "14 - Signal notifications",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/signals/{{signalId}}/notifications"
+      }
+    }
+  ]
+}

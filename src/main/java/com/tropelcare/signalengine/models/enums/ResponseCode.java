@@ -1,0 +1,11 @@
+package com.tropelcare.signalengine.models.enums;
+
+public enum ResponseCode {
+    DISPATCH_NUTRIENT_PACK,
+    SEND_COMPANIONSHIP_PROTOCOL,
+    ISOLATE_AND_OBSERVE,
+    ACTIVATE_SECTOR_LOCK,
+    DEPLOY_MEDIATION_FIELD,
+    ENABLE_POPULATION_CONTROL,
+    ARCHIVE_AND_IGNORE
+}
