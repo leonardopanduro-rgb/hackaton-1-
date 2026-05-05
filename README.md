@@ -48,7 +48,7 @@ DB_NAME=tropelcare
 DB_USERNAME=tropeluser
 DB_PASSWORD=tropelpass
 
-GITHUB_TOKEN=<personal_access_token_con_permisos_de_models>
+GITHUB_TOKEN=<personal_access_token_con_permiso_models_read>
 GITHUB_MODELS_URL=https://models.inference.ai.azure.com
 MODEL_ID=gpt-4o-mini
 
@@ -61,6 +61,8 @@ ADMIN_NAME=Cameron Walker
 ADMIN_EMAIL=cameron@tuckersoft.com
 ADMIN_NOTIFICATION_EMAIL=<email_real_del_equipo@gmail.com>
 ```
+
+El token de GitHub debe ser un fine-grained PAT con `Account permissions -> Models: Read-only`. Si el token no tiene ese permiso, GitHub Models devuelve `401` y la app activa el fallback obligatorio (`SENAL_CORRUPTA`, `status=ERROR`, sin evento asíncrono).
 
 El archivo `.env` esta en `.gitignore`; no lo subas al repositorio.
 
