@@ -27,7 +27,7 @@ docker run --name tropelcare-db \
   -e POSTGRES_DB=tropelcare \
   -e POSTGRES_USER=tropeluser \
   -e POSTGRES_PASSWORD=tropelpass \
-  -p 5433:5432 \
+  -p 5432:5432 \
   -d postgres:16
 ```
 
@@ -43,7 +43,7 @@ Copia `.env.example` como `.env` en la raiz del proyecto y reemplaza los valores
 
 ```properties
 DB_HOST=localhost
-DB_PORT=5433
+DB_PORT=5432
 DB_NAME=tropelcare
 DB_USERNAME=tropeluser
 DB_PASSWORD=tropelpass
