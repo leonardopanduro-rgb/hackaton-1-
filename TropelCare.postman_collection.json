@@ -5,14 +5,29 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "sectorId", "value": "1" },
-    { "key": "tropelId", "value": "1" },
-    { "key": "signalId", "value": "1" },
-    { "key": "signal2Id", "value": "2" }
+    { "key": "guardianId", "value": "1" },
+    { "key": "sectorId", "value": "" },
+    { "key": "tropelId", "value": "" },
+    { "key": "signalId", "value": "" },
+    { "key": "signal2Id", "value": "" }
   ],
   "item": [
     {
       "name": "1 - List guardians",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const guardians = pm.response.json();",
+              "pm.test('Cameron Walker exists', () => pm.expect(guardians.length).to.be.above(0));",
+              "pm.collectionVariables.set('guardianId', guardians[0].id);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/guardians"
@@ -20,6 +35,21 @@
     },
     {
       "name": "2 - Create sector capacity 1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "const sector = pm.response.json();",
+              "pm.expect(sector.currentLoad).to.eql(0);",
+              "pm.expect(sector.stabilityLevel).to.eql(100);",
+              "pm.collectionVariables.set('sectorId', sector.id);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -32,18 +62,46 @@
     },
     {
       "name": "3 - Create BipBop",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "const tropel = pm.response.json();",
+              "pm.expect(tropel.energyLevel).to.eql(80);",
+              "pm.expect(tropel.chaosIndex).to.eql(10);",
+              "pm.expect(tropel.vitalState).to.eql('ESTABLE');",
+              "pm.collectionVariables.set('tropelId', tropel.id);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"BipBop\",\n  \"species\": \"GLITCHY\",\n  \"sectorId\": {{sectorId}},\n  \"guardianId\": 1\n}"
+          "raw": "{\n  \"name\": \"BipBop\",\n  \"species\": \"GLITCHY\",\n  \"sectorId\": {{sectorId}},\n  \"guardianId\": {{guardianId}}\n}"
         },
         "url": "{{baseUrl}}/api/v1/tropels"
       }
     },
     {
       "name": "4 - Get sector",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().currentLoad).to.eql(1);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/sectors/{{sectorId}}"
@@ -51,30 +109,70 @@
     },
     {
       "name": "5 - Create second Tropel should fail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('400 sector full', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"BipBop2\",\n  \"species\": \"CHISPA\",\n  \"sectorId\": {{sectorId}},\n  \"guardianId\": 1\n}"
+          "raw": "{\n  \"name\": \"BipBop2\",\n  \"species\": \"CHISPA\",\n  \"sectorId\": {{sectorId}},\n  \"guardianId\": {{guardianId}}\n}"
         },
         "url": "{{baseUrl}}/api/v1/tropels"
       }
     },
     {
       "name": "6 - Create hunger signal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "const signal = pm.response.json();",
+              "pm.expect(signal.signalType).to.eql('HAMBRE');",
+              "pm.expect(signal.assignedUnit).to.eql('Laboratorio de Nutricion');",
+              "pm.collectionVariables.set('signalId', signal.id);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": 1,\n  \"senderTag\": \"sensor-norte-7\",\n  \"rawContent\": \"BipBop lleva 3 ciclos sin recibir nutrientes y ha empezado a morder los bordes del sector digital.\"\n}"
+          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": {{guardianId}},\n  \"senderTag\": \"sensor-norte-7\",\n  \"rawContent\": \"BipBop lleva 3 ciclos sin recibir nutrientes y ha empezado a morder los bordes del sector digital.\"\n}"
         },
         "url": "{{baseUrl}}/api/v1/signals"
       }
     },
     {
       "name": "7 - Get Tropel",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const tropel = pm.response.json();",
+              "pm.expect(tropel.energyLevel).to.be.below(80);",
+              "pm.expect(tropel.chaosIndex).to.be.above(10);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/tropels/{{tropelId}}"
@@ -82,6 +180,18 @@
     },
     {
       "name": "8 - Get care response",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json().responseCode).to.eql('DISPATCH_NUTRIENT_PACK');"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/signals/{{signalId}}/care-response"
@@ -89,18 +199,46 @@
     },
     {
       "name": "9 - Create mutation signal",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "const signal = pm.response.json();",
+              "pm.expect(signal.signalType).to.eql('MUTACION');",
+              "pm.collectionVariables.set('signal2Id', signal.id);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": 1,\n  \"senderTag\": \"sensor-genetico-1\",\n  \"rawContent\": \"BipBop emite un brillo verde anomalo. Se han detectado dos extremidades adicionales que no existian en el registro inicial.\"\n}"
+          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": {{guardianId}},\n  \"senderTag\": \"sensor-genetico-1\",\n  \"rawContent\": \"BipBop emite un brillo verde anómalo. Se han detectado dos extremidades adicionales que no existían en el registro inicial.\"\n}"
         },
         "url": "{{baseUrl}}/api/v1/signals"
       }
     },
     {
       "name": "10 - Get signal 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const signal = pm.response.json();",
+              "pm.expect(signal.signalType).to.exist;",
+              "pm.expect(signal.severity).to.exist;"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/signals/{{signal2Id}}"
@@ -108,18 +246,46 @@
     },
     {
       "name": "11 - Wrong guardian should fail",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('400 guardian mismatch', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": 99,\n  \"senderTag\": \"sensor-test\",\n  \"rawContent\": \"Prueba de validacion de guardian incorrecto.\"\n}"
+          "raw": "{\n  \"tropelId\": {{tropelId}},\n  \"guardianId\": 999999,\n  \"senderTag\": \"sensor-test\",\n  \"rawContent\": \"Prueba de validación de guardián incorrecto.\"\n}"
         },
         "url": "{{baseUrl}}/api/v1/signals"
       }
     },
     {
       "name": "12 - Filter signals by HAMBRE",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const page = pm.response.json();",
+              "pm.expect(page).to.have.property('content');",
+              "pm.expect(page).to.have.property('totalElements');",
+              "pm.expect(page).to.have.property('totalPages');",
+              "pm.expect(page).to.have.property('currentPage');",
+              "pm.expect(page).to.have.property('size');"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/signals?signalType=HAMBRE&page=0&size=10"
@@ -127,6 +293,23 @@
     },
     {
       "name": "13 - Filter Tropels by ESTABLE",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const page = pm.response.json();",
+              "pm.expect(page).to.have.property('content');",
+              "pm.expect(page).to.have.property('totalElements');",
+              "pm.expect(page).to.have.property('totalPages');",
+              "pm.expect(page).to.have.property('currentPage');",
+              "pm.expect(page).to.have.property('size');"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/tropels?vitalState=ESTABLE&page=0&size=10"
@@ -134,6 +317,18 @@
     },
     {
       "name": "14 - Signal notifications",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.expect(pm.response.json()).to.be.an('array');"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "url": "{{baseUrl}}/api/v1/signals/{{signalId}}/notifications"

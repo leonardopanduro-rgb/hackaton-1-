@@ -1,7 +1,6 @@
 package com.tropelcare.signalengine.services;
 
 import com.tropelcare.signalengine.exceptions.BadRequestException;
-import com.tropelcare.signalengine.models.enums.Species;
 import java.util.Locale;
 
 public final class EnumParser {
@@ -15,12 +14,6 @@ public final class EnumParser {
         }
 
         String normalized = value.trim().toUpperCase(Locale.ROOT);
-        if (enumClass.equals(Species.class)) {
-            normalized = normalized
-                    .replace("\u00D1", "N")
-                    .replace("\u00F1", "N");
-        }
-
         try {
             return Enum.valueOf(enumClass, normalized);
         } catch (IllegalArgumentException exception) {

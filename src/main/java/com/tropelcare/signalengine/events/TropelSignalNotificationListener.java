@@ -15,6 +15,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -30,7 +31,7 @@ public class TropelSignalNotificationListener {
     private final JavaMailSender mailSender;
 
     @Async("tropelTaskExecutor")
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(TropelSignalCreatedEvent event) {
         TropelSignal signal = signalRepository.findById(event.signalId())
@@ -88,26 +89,26 @@ public class TropelSignalNotificationListener {
         return """
                 Hola %s,
 
-                Tu Tropel ha emitido una senal que requiere atencion.
+                Tu Tropel ha emitido una señal que requiere atención.
 
-                ------------------------------------
-                Senal ID         : #%d
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                Señal ID         : #%d
                 Tropel           : %s (%s)
-                Tipo de senal    : %s
+                Tipo de señal    : %s
                 Severidad        : %s
                 Unidad asignada  : %s
-                Accion sugerida  : %s
+                Acción sugerida  : %s
                 Estado vital     : %s
-                Nivel de energia : %d/100
-                Indice de caos   : %d/100
-                Etapa mutacion   : %d/5
+                Nivel de energía : %d/100
+                Índice de caos   : %d/100
+                Etapa mutación   : %d/5
                 Registrada       : %s
-                ------------------------------------
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-                Senal original:
+                Señal original:
                 "%s"
 
-                -- TropelCare Signal Engine, Tuckersoft
+                — TropelCare Signal Engine, Tuckersoft
                 """.formatted(
                 signal.getGuardian().getDisplayName(),
                 signal.getId(),

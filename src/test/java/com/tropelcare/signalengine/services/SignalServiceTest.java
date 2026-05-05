@@ -9,7 +9,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tropelcare.signalengine.clients.AiClassificationClient;
+import com.tropelcare.signalengine.clients.AiClassificationParser;
 import com.tropelcare.signalengine.clients.AiClassificationResult;
 import com.tropelcare.signalengine.dtos.signal.SignalRequest;
 import com.tropelcare.signalengine.dtos.signal.SignalResponse;
@@ -158,6 +160,25 @@ class SignalServiceTest {
         assertEquals(80, tropel.getEnergyLevel());
         assertEquals(10, tropel.getChaosIndex());
         verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void createsSignalWhenAiContentHasExtraTextAroundJson() {
+        mockExistingTropelAndGuardian();
+        AiClassificationParser parser = new AiClassificationParser(new ObjectMapper());
+        String modelContent = """
+                texto inicial
+                {"signalType":"MUTACION","severity":"GRAVE","assignedUnit":"Division Genetica","recommendedAction":"Aislar al Tropel y observar la mutacion."}
+                texto final
+                """;
+        when(aiClassificationClient.classify(any())).thenReturn(parser.parse(modelContent));
+
+        SignalResponse response = signalService.create(validRequest(1L));
+
+        assertEquals("MUTACION", response.signalType());
+        assertEquals("GRAVE", response.severity());
+        assertEquals("Division Genetica", response.assignedUnit());
+        assertEquals("RECIBIDA", response.status());
     }
 
     @Test
