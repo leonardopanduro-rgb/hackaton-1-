@@ -4,9 +4,9 @@ Backend Spring Boot para la hackathon DBP. No incluye frontend: todo el flujo se
 
 ## Integrantes
 
-- Nombre completo - Codigo UTEC
-- Nombre completo - Codigo UTEC
-- Nombre completo - Codigo UTEC
+- Leonardo Panduro Chinchay 
+-Daniel Sandoval
+-Valentina Alvarez 
 
 ## Stack
 
